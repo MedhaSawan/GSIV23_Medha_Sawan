@@ -1,14 +1,20 @@
 import React, { Component } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
 import withRouter from "./withRouter";
-// import { Container, Row, Col, Button, Card } from "reac÷t-bootstrap";
+import { Link } from "react-router-dom";
+
+import { Row, Col } from "react-bootstrap";
 
 class MovieDetail extends Component {
   constructor(props) {
     super(props);
-    debugger;
     this.state = {
       movie: {},
+      credits: {},
+      director: "",
+      cast: "",
     };
   }
 
@@ -34,29 +40,109 @@ class MovieDetail extends Component {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
+
+    fetch(
+      `https://api.themoviedb.org/3/movie/${itemId}/credits?language=en-US`,
+      options
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        data.cast.map((c, index) =>
+          this.setState((prevState) => ({
+            cast: prevState.cast + c.name + ", ",
+          }))
+        );
+        data.crew.map((c, index) => {
+          if (c.job === "Director") {
+            this.setState((prevState) => ({
+              director: prevState.director + c.name + ", ",
+            }));
+          }
+        });
+      })
+
+      .catch((err) => console.error(err));
   }
 
   render() {
     const { movie } = this.state;
-    const itemId = this.props.params.id;
 
     return (
       <div>
-        <h1>Movie Detail</h1>
-        <div className="movie-list w-100">
-          <div key={movie.id} className="movie-card col-md- col-sm-6">
-            <img
-              src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
-              alt={`${movie.title} Poster`}
-              className="movie-image"
-            />
-            <div className="movie-details">
-              <h2 className="movie-title">{movie.title}</h2>
-              <p className="movie-rating">Rating: {movie.vote_average}</p>
-              <p className="movie-description">{movie.overview}</p>
-            </div>
-          </div>
-        </div>
+        <Row>
+          <Col
+            xs={7}
+            sm={7}
+            md={7}
+            lg={7}
+            style={{
+              position: "relative",
+              float: "Left",
+            }}
+            className="d-flex"
+          >
+            <Link className="p-0 m-2" to={"/"}>
+              <img src="../../back.png" alt="Back" />
+            </Link>
+            <h3>Movie Detail</h3>
+          </Col>
+          <Col xs={5} sm={5} md={5} lg={5}>
+            <Link
+              className="p-0 m-2"
+              style={{
+                position: "relative",
+                float: "right",
+              }}
+              to={"/"}
+            >
+              <img
+                src="../../home.png"
+                alt="Home"
+                className="movie"
+                style={{ borderRadius: "5px" }}
+              />
+            </Link>
+          </Col>
+        </Row>
+        <Row>
+          <Col key={movie.id} className="d-flex justify-content-left">
+            <Col xs={2} sm={2} md={2} lg={2}>
+              <img
+                src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+                alt={`${movie.title} Poster`}
+                className="movie-image"
+                width={"100%"}
+                height={"300px"}
+              />
+            </Col>
+            <Col xs={10} sm={10} md={10} lg={10}>
+              <div
+                className="movie-details p-1"
+                style={{ maxWidth: "82%", textAlign: "start", height: "300px" }}
+              >
+                <p className="d-flex">
+                  <strong>{movie.title}</strong>
+                  <span style={{ fontSize: "small", marginTop: "2px" }}>
+                    ({movie.vote_average})
+                  </span>
+                </p>
+                <p>
+                  {movie.release_date?.slice(0, 4)} | {movie.runtime}min |{" "}
+                  {this.state.director.slice(0, this.state.director.length - 2)}
+                </p>
+                <p
+                  className="text-truncate"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title={this.state.cast}
+                >
+                  Cast: {this.state.cast.slice(0, this.state.cast.length - 2)}
+                </p>
+                <p className="movie-description">{movie.overview}</p>
+              </div>
+            </Col>
+          </Col>
+        </Row>
       </div>
     );
   }

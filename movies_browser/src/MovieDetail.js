@@ -47,12 +47,12 @@ class MovieDetail extends Component {
     )
       .then((response) => response.json())
       .then((data) => {
-        data.cast.map((c, index) =>
+        data.cast.forEach((c) =>
           this.setState((prevState) => ({
             cast: prevState.cast + c.name + ", ",
           }))
         );
-        data.crew.map((c, index) => {
+        data.crew.forEach((c) => {
           if (c.job === "Director") {
             this.setState((prevState) => ({
               director: prevState.director + c.name + ", ",
